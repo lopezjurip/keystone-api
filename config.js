@@ -9,6 +9,9 @@ exports.init = {
 
   'auto update': true,
   mongo: process.env.MONGO_URI || 'mongodb://localhost/my-project',
+  'mongo options': {
+
+  },
 
   session: true,
   auth: true,

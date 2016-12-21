@@ -1,9 +1,12 @@
 const keystone = require('keystone');
+const express = require('express');
 const mongoose = require('mongoose');
 const Promise = require('bluebird');
 
 const config = require('./config');
 const routes = require('./routes');
+
+const app = express();
 
 // Setup MongoDB driver
 mongoose.Promise = Promise;
@@ -23,4 +26,10 @@ keystone.set('nav', {
   users: 'User',
 });
 
-module.exports = keystone;
+keystone.initExpressApp(app);
+keystone.openDatabaseConnection(() => {
+  console.log('Connected'); // eslint-disable-line
+});
+
+exports.app = app;
+exports.keystone = keystone;
