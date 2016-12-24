@@ -28,7 +28,7 @@ keystone.set('nav', {
 
 keystone.initExpressApp(app);
 keystone.openDatabaseConnection(() => {
-  console.log('Connected'); // eslint-disable-line
+  console.log(`> Connected to ${keystone.get('mongo')}`); // eslint-disable-line
 });
 
 exports.app = app;

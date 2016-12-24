@@ -1,3 +1,5 @@
+const Promise = require('bluebird');
+
 exports.init = {
   name: 'API',
 
@@ -10,7 +12,7 @@ exports.init = {
   'auto update': true,
   mongo: process.env.MONGO_URI || 'mongodb://localhost/my-project',
   'mongo options': {
-
+    promiseLibrary: Promise,
   },
 
   session: true,
