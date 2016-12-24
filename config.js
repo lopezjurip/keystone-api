@@ -17,6 +17,6 @@ exports.init = {
 
   session: true,
   auth: true,
-  'user model': 'User',
+  'user model': 'Administrator',
   'cookie secret': process.env.COOKIE_SECRET || 'demo',
 };

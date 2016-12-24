@@ -6,23 +6,31 @@ const Types = keystone.Field.Types;
  * User Model
  * ==========
  */
-const User = new keystone.List('User');
-
-User.add({
-  name: { type: Types.Name, required: true, index: true },
-  email: { type: Types.Email, initial: true, required: true, index: true },
-  password: { type: Types.Password, initial: true, required: true },
-}, 'Permissions', {
-  isAdmin: { type: Boolean, label: 'Can access Keystone', default: false, index: true },
+const User = new keystone.List('User', {
+  track: true,
 });
 
-// Provide access to Keystone
-User.schema.virtual('canAccessKeystone').get(function canAccessKeystone() {
-  return this.isAdmin;
+User.add({
+  name: {
+    type: Types.Name,
+    required: true,
+  },
+  email: {
+    type: Types.Email,
+    initial: true,
+    required: true,
+    index: true,
+  },
+  password: {
+    type: Types.Password,
+    initial: true,
+    required: true,
+  },
 });
 
 /**
  * Registration
  */
-User.defaultColumns = 'name, email, isAdmin';
+User.defaultSort = '-createdAt';
+User.defaultColumns = 'name, email';
 User.register();

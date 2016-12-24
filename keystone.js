@@ -23,7 +23,7 @@ keystone.set('routes', routes);
 
 // Configure the navigation bar in Keystone's Admin UI
 keystone.set('nav', {
-  users: 'User',
+  users: ['Administrator', 'User'],
 });
 
 keystone.initExpressApp(app);
