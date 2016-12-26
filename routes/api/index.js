@@ -3,14 +3,31 @@ const keystone = require('keystone');
 const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
-const BearerStrategy = require('passport-http-bearer').Strategy;
+const FacebookTokenStrategy = require('passport-facebook-token');
+const config = require('../../config').auth;
 
-const config = require('../../config');
 
-const facebook = Object.assign({}, config.auth.facebook, {
-  profileFields: ['id', 'email', 'first_name', 'last_name'],
-});
+const facebookVerify = (accessToken, refreshToken, profile, done) => {
+  const User = keystone.list('User').model;
 
+  User.findOne({ 'facebook.id': profile.id })
+    // Update or create
+    .then(result => result || new User())
+    .then(user => Object.assign(user, {
+      facebook: {
+        id: profile.id,
+        profile: JSON.stringify(profile, null, 4),
+        accessToken,
+        refreshToken,
+      },
+    }))
+    .then(user => user.save())
+    .then(user => done(null, user))
+    .catch(done);
+};
+
+passport.use(new FacebookTokenStrategy(config.facebook, facebookVerify));
+passport.use(new FacebookStrategy(config.facebook, facebookVerify));
 passport.use(new LocalStrategy((email, password, done) => {
   const User = keystone.list('User').model;
 
@@ -27,50 +44,6 @@ passport.use(new LocalStrategy((email, password, done) => {
   }).catch(done);
 }));
 
-passport.use(new FacebookStrategy(facebook, (accessToken, refreshToken, profile, done) => {
-  const User = keystone.list('User').model;
-
-  User.findOne({ 'facebook.id': profile.id }).then(result => {
-    // Already logged user
-    const user = result || new User();
-    // if (user) {
-    //   return done(null, user);
-    // }
-
-    user.facebook = {
-      id: profile.id,
-      profile: JSON.stringify(profile, null, 4),
-      accessToken,
-      refreshToken,
-    };
-    return user.save();
-
-    // Create user
-    // return keystone.list('User').model.create({
-    //   facebook: {
-    //     id: profile.id,
-    //     profile: JSON.stringify(profile, null, 4),
-    //     accessToken,
-    //     refreshToken,
-    //   },
-    // });
-  })
-  .then(user => done(null, user))
-  .catch(done);
-}));
-
-passport.use(new BearerStrategy((accessToken, done) => {
-  const User = keystone.list('User').model;
-
-  User.findOne({ 'facebook.accessToken': accessToken }).then(user => {
-    // User not found
-    if (!user) {
-      return done(null, false);
-    }
-    // Continue
-    return done(null, user, { scope: 'all' });
-  }).catch(done);
-}));
 
 const router = new express.Router();
 
@@ -98,7 +71,13 @@ router.get('/auth/facebook/callback', passport.authenticate('facebook', {
   res.redirect(`/api/profile?access_token=${req.user.facebook.accessToken}`); // ?accessToken=''
 });
 
-router.get('/profile', passport.authenticate('bearer', {
+router.post('/auth/facebook/token', passport.authenticate('facebook-token', {
+  session: false,
+}), (req, res) => {
+  res.json(req.user);
+});
+
+router.get('/profile', passport.authenticate('facebook-token', {
   session: false,
 }), (req, res) => {
   res.json(req.user);

@@ -31,5 +31,7 @@ exports.auth = {
     clientID: process.env.FACEBOOK_AUTH_ID,
     clientSecret: process.env.FACEBOOK_AUTH_SECRET,
     callbackURL: process.env.FACEBOOK_AUTH_CALLBACK || `http://localhost:${PORT}/api/auth/facebook/callback`,
+    profileFields: ['id', 'email', 'first_name', 'last_name'],
+    // profileFields: ['id', 'email', 'name', 'first_name', 'last_name', 'link', 'locale', 'picture'],
   },
 };
