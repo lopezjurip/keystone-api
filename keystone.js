@@ -1,12 +1,14 @@
 const keystone = require('keystone');
 const express = require('express');
 const mongoose = require('mongoose');
+const validator = require('express-validator');
 const Promise = require('bluebird');
 
 const config = require('./config');
 const routes = require('./routes');
 
 const app = express();
+app.use(validator());
 
 // Setup MongoDB driver
 mongoose.Promise = Promise;
@@ -27,8 +29,9 @@ keystone.set('nav', {
 });
 
 keystone.initExpressApp(app);
-keystone.openDatabaseConnection(() => {
-  console.log(`> Connected to ${keystone.get('mongo')}`); // eslint-disable-line
+keystone.openDatabaseConnection(err => {
+  if (err) console.error(err); // eslint-disable-line
+  else console.log(`> Connected to ${keystone.get('mongo')}`); // eslint-disable-line
 });
 
 exports.app = app;
